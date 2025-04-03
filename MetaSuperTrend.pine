@@ -31,6 +31,12 @@ reversalDown = directionChange > 0  // Changed from up to down (direction change
 var reversalUpHistory = array.new_int(countPeriod, 0)
 var reversalDownHistory = array.new_int(countPeriod, 0)
 
+// Arrays to track bars between reversals within the specified period
+var barsBetweenReversalsArray = array.new_int(0)
+
+// Variables to track bars between reversals
+var int barsSinceLastReversal = 0
+
 // Update reversal history arrays
 array.shift(reversalUpHistory)
 array.push(reversalUpHistory, reversalUp ? 1 : 0)
@@ -42,12 +48,32 @@ upReversals = array.sum(reversalUpHistory)
 downReversals = array.sum(reversalDownHistory)
 totalReversals = upReversals + downReversals
 
+// Update bars between reversals statistics
+if (reversalUp or reversalDown)
+    if (barsSinceLastReversal > 0)  // Skip the first reversal as we don't know when the previous one occurred
+        // Only record bars between reversals if it's within the period limit
+        barsBetweenReversalsToAdd = math.min(barsSinceLastReversal, countPeriod)
+        array.push(barsBetweenReversalsArray, barsBetweenReversalsToAdd)
+        // Keep only the most recent data points within our period
+        if (array.size(barsBetweenReversalsArray) > totalReversals)
+            array.shift(barsBetweenReversalsArray)
+    barsSinceLastReversal := 0
+else
+    barsSinceLastReversal := barsSinceLastReversal + 1
+    // Cap the counter at countPeriod to ensure we don't exceed the specified period
+    barsSinceLastReversal := math.min(barsSinceLastReversal, countPeriod)
+
+// Calculate statistics based on the array (only for the specified period)
+maxBarsBetweenReversals = array.size(barsBetweenReversalsArray) > 0 ? array.max(barsBetweenReversalsArray) : 0
+minBarsBetweenReversals = array.size(barsBetweenReversalsArray) > 0 ? array.min(barsBetweenReversalsArray) : 0
+avgBarsBetweenReversals = array.size(barsBetweenReversalsArray) > 0 ? array.avg(barsBetweenReversalsArray) : 0
+
 // Visualize trend changes with markers
 plotshape(reversalUp, "Bullish Reversal", shape.triangleup, location.belowbar, color.green, 0, size=size.small)
 plotshape(reversalDown, "Bearish Reversal", shape.triangledown, location.abovebar, color.red, 0, size=size.small)
 
 // Create and update the table
-var table trendTable = table.new(position=tablePosition, columns=2, rows=4, bgcolor=tableBgColor, border_width=1)
+var table trendTable = table.new(position=tablePosition, columns=2, rows=7, bgcolor=tableBgColor, border_width=1)
 
 // Function to determine table position
 f_tablePosition() =>
@@ -69,7 +95,7 @@ f_fontSize() =>
 
 // Update table on every bar
 if (barstate.islast)
-    table.clear(trendTable, 0, 0, 1, 3)
+    table.clear(trendTable, 0, 0, 1, 6)
     
     // Set table position (can change if user modifies the input)
     table.set_position(trendTable, f_tablePosition())
@@ -87,6 +113,16 @@ if (barstate.islast)
     
     table.cell(trendTable, 0, 3, "Total Reversals", text_color=tableTextColor, text_size=f_fontSize())
     table.cell(trendTable, 1, 3, str.tostring(totalReversals), text_color=tableTextColor, text_size=f_fontSize())
+    
+    // New rows for bars between reversals statistics
+    table.cell(trendTable, 0, 4, "Max Bars Between Reversals", text_color=tableTextColor, text_size=f_fontSize())
+    table.cell(trendTable, 1, 4, str.tostring(maxBarsBetweenReversals), text_color=tableTextColor, text_size=f_fontSize())
+    
+    table.cell(trendTable, 0, 5, "Avg Bars Between Reversals", text_color=tableTextColor, text_size=f_fontSize())
+    table.cell(trendTable, 1, 5, str.tostring(math.round(avgBarsBetweenReversals)), text_color=tableTextColor, text_size=f_fontSize())
+    
+    table.cell(trendTable, 0, 6, "Min Bars Between Reversals", text_color=tableTextColor, text_size=f_fontSize())
+    table.cell(trendTable, 1, 6, array.size(barsBetweenReversalsArray) > 0 ? str.tostring(minBarsBetweenReversals) : "N/A", text_color=tableTextColor, text_size=f_fontSize())
 
 // Add background colors to indicate the current trend
 bgcolor(direction < 0 ? color.new(color.green, 95) : color.new(color.red, 95))
