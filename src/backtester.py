@@ -70,7 +70,11 @@ class BacktestEngine:
         
         # Add signals to data
         data_with_signals = data.copy()
-        data_with_signals['signal'] = signals
+        # Extract signal column if signals is a DataFrame, otherwise use as-is
+        if hasattr(signals, 'signal'):
+            data_with_signals['signal'] = signals['signal']
+        else:
+            data_with_signals['signal'] = signals
         
         # Execute trades based on signals
         self._execute_trades(data_with_signals)
@@ -82,9 +86,38 @@ class BacktestEngine:
             'trades': self.trades,
             'performance_metrics': performance.get_summary_stats(),
             'equity_curve': performance.generate_equity_curve(),
-            'total_signals': len([s for s in signals if s != 'HOLD']),
+            'total_signals': self._count_signals(data_with_signals['signal']),
             'strategy_type': 'improved' if use_improved_strategy else 'baseline'
         }
+    
+    def _count_signals(self, signals):
+        """
+        Count non-hold signals, handling both string and numeric formats.
+        
+        Args:
+            signals: Series or list of signals
+            
+        Returns:
+            int: Number of non-hold signals
+        """
+        if hasattr(signals, 'values'):
+            # Handle pandas Series
+            signal_values = signals.values
+        else:
+            # Handle list or array
+            signal_values = signals
+        
+        count = 0
+        for signal in signal_values:
+            # Handle both string format ('BUY', 'SELL' vs 'HOLD') and numeric format (1, -1 vs 0)
+            if isinstance(signal, str):
+                if signal != 'HOLD':
+                    count += 1
+            else:
+                if signal != 0:
+                    count += 1
+        
+        return count
     
     def _execute_trades(self, data: pd.DataFrame):
         """

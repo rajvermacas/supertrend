@@ -74,3 +74,11 @@ Thumbs.db
 # Temporary files
 *.tmp
 *.temp
+
+# Generated output files (these will be created by Stage 5)
+equity_curve.png
+trade_executions.png
+results.md
+
+# Debug files
+debug_*.py

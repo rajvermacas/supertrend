@@ -32,15 +32,15 @@ class StrategyEngine:
         self.indicators = TechnicalIndicators()
         logger.info("StrategyEngine initialized")
     
-    def generate_baseline_signals(self, data: pd.DataFrame, atr_period: int, 
-                                multiplier: float) -> pd.DataFrame:
+    def generate_baseline_signals(self, data: pd.DataFrame, 
+                                atr_period_or_config=None, multiplier: float = None) -> pd.DataFrame:
         """
         Generate baseline Supertrend signals without filters.
         
         Args:
             data: OHLCV DataFrame
-            atr_period: Period for ATR calculation
-            multiplier: Multiplier for Supertrend calculation
+            atr_period_or_config: Either ATR period (int) or config dict
+            multiplier: Multiplier for Supertrend calculation (if first arg is int)
             
         Returns:
             pd.DataFrame: DataFrame with signals, supertrend, and trend columns
@@ -48,6 +48,18 @@ class StrategyEngine:
         Raises:
             ValueError: If parameters are invalid
         """
+        # Handle both calling patterns: (data, config) or (data, atr_period, multiplier)
+        if isinstance(atr_period_or_config, dict):
+            # Config dictionary format
+            config = atr_period_or_config
+            atr_period = config['atr_period']
+            multiplier = config['multiplier']
+        else:
+            # Individual parameters format
+            atr_period = atr_period_or_config
+            if multiplier is None:
+                raise ValueError("multiplier is required when atr_period is provided as individual parameter")
+        
         if atr_period <= 0:
             raise ValueError("ATR period must be greater than 0")
         if multiplier <= 0:
