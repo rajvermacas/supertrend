@@ -65,3 +65,19 @@ class Config:
                 'volatility_percentile': cls.VOLATILITY_PERCENTILE
             }
         }
+
+
+# Configuration dictionaries for easy import
+BASELINE_CONFIG = {
+    'atr_period': Config.BASELINE_ATR_PERIOD,
+    'multiplier': Config.BASELINE_MULTIPLIER
+}
+
+IMPROVED_CONFIG = {
+    'atr_period': Config.BASELINE_ATR_PERIOD,
+    'multiplier': Config.BASELINE_MULTIPLIER,
+    'ema_period': Config.EMA_PERIOD,
+    'volume_ma_period': Config.VOLUME_MA_PERIOD,
+    'atr_volatility_period': Config.ATR_VOLATILITY_PERIOD,
+    'volatility_percentile': Config.VOLATILITY_PERCENTILE
+}
