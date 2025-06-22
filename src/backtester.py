@@ -64,7 +64,16 @@ class BacktestEngine:
         
         # Generate signals based on strategy type
         if use_improved_strategy:
-            signals = strategy_engine.generate_improved_signals(data, strategy_config)
+            # Unpack improved strategy parameters
+            signals = strategy_engine.generate_improved_signals(
+                data=data,
+                atr_period=strategy_config['atr_period'],
+                multiplier=strategy_config['multiplier'],
+                ema_period=strategy_config['ema_period'],
+                volume_period=strategy_config['volume_ma_period'],
+                volatility_period=strategy_config['atr_volatility_period'],
+                volatility_percentile=strategy_config['volatility_percentile']
+            )
         else:
             signals = strategy_engine.generate_baseline_signals(data, strategy_config)
         

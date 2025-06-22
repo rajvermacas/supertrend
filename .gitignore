@@ -82,3 +82,26 @@ results.md
 
 # Debug files
 debug_*.py
+
+# Testing artifacts
+test_main_fast.py
+test_output/
+benchmark_results/
+
+# Performance profiling
+*.prof
+*.profile
+
+# Cache and temporary data
+*.cache
+.mypy_cache/
+.ruff_cache/
+
+# Documentation builds
+docs/_build/
+docs/build/
+
+# IDE and editor configs
+.editorconfig
+.flake8
+pyrightconfig.json

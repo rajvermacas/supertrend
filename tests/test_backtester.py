@@ -360,8 +360,16 @@ class TestBacktestEngine:
             use_improved_strategy=True
         )
         
-        # Check that the strategy engine was called correctly
-        mock_instance.generate_improved_signals.assert_called_once_with(sample_data, IMPROVED_CONFIG)
+        # Check that the strategy engine was called correctly (with unpacked parameters)
+        mock_instance.generate_improved_signals.assert_called_once_with(
+            data=sample_data,
+            atr_period=IMPROVED_CONFIG['atr_period'],
+            multiplier=IMPROVED_CONFIG['multiplier'],
+            ema_period=IMPROVED_CONFIG['ema_period'],
+            volume_period=IMPROVED_CONFIG['volume_ma_period'],
+            volatility_period=IMPROVED_CONFIG['atr_volatility_period'],
+            volatility_percentile=IMPROVED_CONFIG['volatility_percentile']
+        )
         
         # Check result structure
         assert result['strategy_type'] == 'improved'
